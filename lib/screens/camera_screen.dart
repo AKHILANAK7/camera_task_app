@@ -10,13 +10,20 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  // Removed File variable _image; since we don't need to hold the image anymore.
+  bool _isLoading = false;
 
-  // Method to pick image from camera or gallery
   Future<void> _pickImage(ImageSource source) async {
+    setState(() {
+      _isLoading = true;
+    });
+
     final pickedFile = await ImagePicker().pickImage(source: source);
+
+    setState(() {
+      _isLoading = false;
+    });
+
     if (pickedFile != null) {
-      // Navigate to display the picture screen
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -30,52 +37,95 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {},
-        ),
-        title: const Text('Take a photo of document'),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Take a photo of document',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Please ensure photos are clear and visible',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-          Center(
-            child: GestureDetector(
-              onTap: () {
-                _showImageSourceOptions();
-              },
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 255, 255),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: const Icon(Icons.add, size: 50),
+      backgroundColor: Colors.grey[200],
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 40.0, horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Back button
+                  Container(
+                    width: 40.0,
+                    height: 40.0,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new),
+                      onPressed: () {},
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 10.0, left: 16),
+                    child: Text(
+                      'Take a photo of document',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Text color
+                      ),
+                    ),
+                  ),
+                  const Row(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Please ensure photos are clear and visible',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontWeight: FontWeight.normal,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 50),
+                  GestureDetector(
+                    onTap: _showImageSourceOptions,
+                    child: Center(
+                      child: Container(
+                        width: 230,
+                        height: 230,
+                        decoration: BoxDecoration(
+                          color: Colors.white60,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              width: 70,
+                              height: 70,
+                              decoration: const BoxDecoration(
+                                color: Colors.black,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const Center(
+                              child: Icon(
+                                Icons.add,
+                                size: 50,
+                                color: Colors.white,
+                              ), // Plus icon
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
-          ),
-        ],
-      ),
     );
   }
 
-  // Show options for camera or gallery
   void _showImageSourceOptions() {
     showModalBottomSheet(
       context: context,
@@ -84,7 +134,7 @@ class _CameraScreenState extends State<CameraScreen> {
           child: Wrap(
             children: [
               ListTile(
-                leading: const Icon(Icons.camera_alt_outlined),
+                leading: const Icon(Icons.camera_alt),
                 title: const Text('Camera'),
                 onTap: () {
                   Navigator.pop(context);
@@ -92,7 +142,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.camera),
+                leading: const Icon(Icons.photo_library),
                 title: const Text('Gallery'),
                 onTap: () {
                   Navigator.pop(context);
