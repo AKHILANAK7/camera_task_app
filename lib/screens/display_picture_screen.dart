@@ -13,31 +13,28 @@ class DisplayPictureScreen extends StatefulWidget {
 }
 
 class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
-  late String _imagePath;
-  bool _isLoading = false;
+  late final ValueNotifier<String> _imagePathNotifier;
+  late final ValueNotifier<bool> _isLoadingNotifier;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _imagePath = widget.imagePath;
+    _imagePathNotifier = ValueNotifier(widget.imagePath);
+    _isLoadingNotifier = ValueNotifier(false);
   }
 
-  void _pickImage(ImageSource source) async {
+  Future<void> _pickImage(ImageSource source) async {
     Navigator.pop(context);
 
-    setState(() {
-      _isLoading = true;
-    });
+    _isLoadingNotifier.value = true;
 
     XFile? newImage = await _picker.pickImage(source: source);
 
-    setState(() {
-      _isLoading = false;
-      if (newImage != null) {
-        _imagePath = newImage.path;
-      }
-    });
+    _isLoadingNotifier.value = false;
+    if (newImage != null) {
+      _imagePathNotifier.value = newImage.path;
+    }
   }
 
   void _showEditOptions() {
@@ -71,17 +68,21 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
+      body: ValueListenableBuilder<bool>(
+        valueListenable: _isLoadingNotifier,
+        builder: (context, isLoading, child) {
+          if (isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            return Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 40.0, horizontal: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 40.0, // Set width
-                    height: 40.0, // Set height
+                    width: 40.0,
+                    height: 40.0,
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       shape: BoxShape.circle,
@@ -117,26 +118,32 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Center(
-                    child: Container(
-                      width: 200,
-                      height: 270,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blueAccent, width: 3),
-                      ),
-                      child: Image.file(
-                        File(_imagePath),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  ValueListenableBuilder<String>(
+                    valueListenable: _imagePathNotifier,
+                    builder: (context, imagePath, child) {
+                      return Center(
+                        child: Container(
+                          width: 200,
+                          height: 270,
+                          decoration: BoxDecoration(
+                            border:
+                                Border.all(color: Colors.blueAccent, width: 3),
+                          ),
+                          child: Image.file(
+                            File(imagePath),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Container(
-                        width: 40.0, // Set width
-                        height: 40.0, // Set height
+                        width: 40.0,
+                        height: 40.0,
                         decoration: const BoxDecoration(
                           color: Colors.black,
                           shape: BoxShape.circle,
@@ -152,8 +159,8 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                         ),
                       ),
                       Container(
-                        width: 40.0, // Set width
-                        height: 40.0, // Set height
+                        width: 40.0,
+                        height: 40.0,
                         decoration: const BoxDecoration(
                           color: Colors.black,
                           shape: BoxShape.circle,
@@ -169,7 +176,10 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
                   ),
                 ],
               ),
-            ),
+            );
+          }
+        },
+      ),
     );
   }
 }
