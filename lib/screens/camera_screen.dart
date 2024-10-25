@@ -10,18 +10,14 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
-  bool _isLoading = false;
+  final ValueNotifier<bool> _isLoadingNotifier = ValueNotifier(false);
 
   Future<void> _pickImage(ImageSource source) async {
-    setState(() {
-      _isLoading = true;
-    });
+    _isLoadingNotifier.value = true;
 
     final pickedFile = await ImagePicker().pickImage(source: source);
 
-    setState(() {
-      _isLoading = false;
-    });
+    _isLoadingNotifier.value = false;
 
     if (pickedFile != null) {
       Navigator.push(
@@ -37,92 +33,71 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 40.0, horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Back button
-                  Container(
-                    width: 40.0,
-                    height: 40.0,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new),
-                      onPressed: () {},
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 10.0, left: 16),
-                    child: Text(
-                      'Take a photo of document',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black, // Text color
-                      ),
-                    ),
-                  ),
-                  const Row(
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 246, 222, 222),
+        title: const Text('RadicalStart'),
+      ),
+      backgroundColor: Colors.white,
+      body: ValueListenableBuilder<bool>(
+        valueListenable: _isLoadingNotifier,
+        builder: (context, isLoading, child) {
+          return isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 40.0, horizontal: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      const Center(
                         child: Text(
-                          'Please ensure photos are clear and visible',
+                          'Upload Image',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                             color: Colors.black,
-                            fontWeight: FontWeight.normal,
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
+                      const SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: _showImageSourceOptions,
+                        child: Center(
+                          child: Container(
+                            width: 300,
+                            height: 300,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: 70,
+                                  height: 70,
+                                  decoration: const BoxDecoration(
+                                    color: Color.fromARGB(255, 94, 1, 255),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const Center(
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 50,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
                     ],
                   ),
-                  const SizedBox(height: 50),
-                  GestureDetector(
-                    onTap: _showImageSourceOptions,
-                    child: Center(
-                      child: Container(
-                        width: 230,
-                        height: 230,
-                        decoration: BoxDecoration(
-                          color: Colors.white60,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Container(
-                              width: 70,
-                              height: 70,
-                              decoration: const BoxDecoration(
-                                color: Colors.black,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            const Center(
-                              child: Icon(
-                                Icons.add,
-                                size: 50,
-                                color: Colors.white,
-                              ), // Plus icon
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            ),
+                );
+        },
+      ),
     );
   }
 
